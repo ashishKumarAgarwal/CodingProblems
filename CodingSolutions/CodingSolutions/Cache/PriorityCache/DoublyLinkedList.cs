@@ -2,30 +2,25 @@
 {
     public class DoublyLinkedList
     {
-        private DLLNode front;
-        private DLLNode end;
+        private DLLNode _head;
+        private DLLNode _tail;
         private int size;
 
-        public DoublyLinkedList()
-        {
-            end = front = null;
-        }
-
-        public DLLNode AddFront(Item x)
+        public DLLNode AddFront(Item item)
         {
             DLLNode retVal;
             if (size == 0)
             {
-                front = new DLLNode(x);
-                end = front;
-                retVal = front;
+                _head = new DLLNode(item);
+                _tail = _head;
+                retVal = _head;
             }
             else
             {
-                DLLNode newNode = new DLLNode(null, x, null);
-                newNode.Next = front;
-                front.Prev = newNode;
-                front = newNode;
+                DLLNode newNode = new DLLNode(null, item, null);
+                newNode.Next = _head;
+                _head.Prev = newNode;
+                _head = newNode;
                 retVal = newNode;
             }
             size++;
@@ -34,8 +29,8 @@
 
         public DLLNode RemoveLast()
         {
-            DLLNode item = end;
-            end = end.Prev;
+            DLLNode item = _tail;
+            _tail = _tail.Prev;
             size--;
             return item;
         }
@@ -49,7 +44,7 @@
 
             if (size == 1)
             {
-                end = front = null;
+                _tail = _head = null;
             }
             else
             {

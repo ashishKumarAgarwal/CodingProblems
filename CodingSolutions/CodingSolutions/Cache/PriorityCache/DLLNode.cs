@@ -2,18 +2,18 @@
 {
     public class DLLNode
     {
-        public Item Data { get; set; }
+        public Item Value { get; set; }
         public DLLNode Next { get; set; }
         public DLLNode Prev { get; set; }
 
         public DLLNode(Item data)
         {
-            Data = data;
+            Value = data;
         }
 
         public DLLNode(DLLNode prev, Item data, DLLNode next)
         {
-            Data = data;
+            Value = data;
             Next = next;
             Prev = prev;
         }

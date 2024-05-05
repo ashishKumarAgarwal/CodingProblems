@@ -5,10 +5,10 @@
         private int _maxSize;
         private int _currSize;
 
-        private PriorityQueue<DLLNode> pqByExpiryTime = new((a, b) => a.Data.ExpireAfter - b.Data.ExpireAfter);
-        private PriorityQueue<DLLNode> pqByPreference = new((a, b) => a.Data.Preference - b.Data.Preference);
-        private Dictionary<int, DoublyLinkedList> preferrenceToList = new();
-        private Dictionary<string, DLLNode> keyToItemNode = new();
+        private PriorityQueue<DLLNode> pqByExpiryTime = new((a, b) => a.Value.Expiry - b.Value.Expiry);
+        private PriorityQueue<DLLNode> pqByPreference = new((a, b) => a.Value.Preference - b.Value.Preference);
+        private Dictionary<int, DoublyLinkedList> preferenceDLLMap = new();
+        private Dictionary<string, DLLNode> keyDLLNodeMap = new();
 
         public PriorityExpiryCache(int maxSize)
         {
@@ -18,7 +18,7 @@
 
         public HashSet<string> GetKeys()
         {
-            return new HashSet<string>(keyToItemNode.Keys);
+            return new HashSet<string>(keyDLLNodeMap.Keys);
         }
 
         public void EvictItem(int currentTime)
@@ -27,47 +27,47 @@
 
             _currSize--;
 
-            if (pqByExpiryTime.Peek().Data.ExpireAfter < currentTime)
+            if (pqByExpiryTime.Peek().Value.Expiry < currentTime)
             {
                 DLLNode node = pqByExpiryTime.Poll();
-                Item item = node.Data;
+                Item item = node.Value;
 
-                DoublyLinkedList dList = preferrenceToList[item.Preference];
+                DoublyLinkedList dList = preferenceDLLMap[item.Preference];
                 dList.RemoveNode(node);
 
                 if (dList.Size() == 0)
                 {
-                    preferrenceToList.Remove(item.Preference);
+                    preferenceDLLMap.Remove(item.Preference);
                 }
 
-                keyToItemNode.Remove(item.Key);
+                keyDLLNodeMap.Remove(item.Key);
                 pqByPreference.Remove(new DLLNode(item));
 
                 return;
             }
 
-            int preference = pqByPreference.Poll().Data.Preference;
+            int preference = pqByPreference.Poll().Value.Preference;
 
-            DoublyLinkedList dList2 = preferrenceToList[preference];
+            DoublyLinkedList dList2 = preferenceDLLMap[preference];
 
             DLLNode leastRecentlyUsedWithLeastPreference = dList2.RemoveLast();
-            keyToItemNode.Remove(leastRecentlyUsedWithLeastPreference.Data.Key);
+            keyDLLNodeMap.Remove(leastRecentlyUsedWithLeastPreference.Value.Key);
             pqByExpiryTime.Remove(leastRecentlyUsedWithLeastPreference);
 
             if (dList2.Size() == 0)
             {
-                preferrenceToList.Remove(preference);
+                preferenceDLLMap.Remove(preference);
             }
         }
 
         public Item GetItem(string key)
         {
-            if (keyToItemNode.ContainsKey(key))
+            if (keyDLLNodeMap.ContainsKey(key))
             {
-                DLLNode node = keyToItemNode[key];
-                Item itemToReturn = node.Data;
+                DLLNode node = keyDLLNodeMap[key];
+                Item itemToReturn = node.Value;
 
-                var dList = preferrenceToList[itemToReturn.Preference];
+                var dList = preferenceDLLMap[itemToReturn.Preference];
 
                 dList.RemoveNode(node);
                 dList.AddFront(itemToReturn);
@@ -86,17 +86,17 @@
             }
 
             DoublyLinkedList dlist;
-            if (preferrenceToList.ContainsKey(item.Preference))
+            if (preferenceDLLMap.ContainsKey(item.Preference))
             {
-                dlist = preferrenceToList[item.Preference];
+                dlist = preferenceDLLMap[item.Preference];
             }
             else
             {
                 dlist = new DoublyLinkedList();
-                preferrenceToList.Add(item.Preference, dlist);
+                preferenceDLLMap.Add(item.Preference, dlist);
             }
             DLLNode node = dlist.AddFront(item);
-            keyToItemNode[item.Key] = node;
+            keyDLLNodeMap[item.Key] = node;
             pqByExpiryTime.Add(node);
             pqByPreference.Add(node);
             _currSize++;
@@ -110,7 +110,7 @@
 
         public PriorityQueue(Comparison<T> comparison)
         {
-            this.data = new List<T>();
+            data = new List<T>();
             this.comparison = comparison;
         }
 
