@@ -5,10 +5,10 @@
         private int _maxSize;
         private int _currSize;
 
-        private PriorityQueue<ListNode<Item>> pqByExpiryTime = new((a, b) => a.Data.ExpireAfter - b.Data.ExpireAfter);
-        private PriorityQueue<ListNode<Item>> pqByPreference = new((a, b) => a.Data.Preference - b.Data.Preference);
-        private Dictionary<int, DoublyLinkedList<Item>> preferrenceToList = new();
-        private Dictionary<string, ListNode<Item>> keyToItemNode = new();
+        private PriorityQueue<DLLNode> pqByExpiryTime = new((a, b) => a.Data.ExpireAfter - b.Data.ExpireAfter);
+        private PriorityQueue<DLLNode> pqByPreference = new((a, b) => a.Data.Preference - b.Data.Preference);
+        private Dictionary<int, DoublyLinkedList> preferrenceToList = new();
+        private Dictionary<string, DLLNode> keyToItemNode = new();
 
         public PriorityExpiryCache(int maxSize)
         {
@@ -29,10 +29,10 @@
 
             if (pqByExpiryTime.Peek().Data.ExpireAfter < currentTime)
             {
-                ListNode<Item> node = pqByExpiryTime.Poll();
+                DLLNode node = pqByExpiryTime.Poll();
                 Item item = node.Data;
 
-                DoublyLinkedList<Item> dList = preferrenceToList[item.Preference];
+                DoublyLinkedList dList = preferrenceToList[item.Preference];
                 dList.RemoveNode(node);
 
                 if (dList.Size() == 0)
@@ -41,16 +41,16 @@
                 }
 
                 keyToItemNode.Remove(item.Key);
-                pqByPreference.Remove(new ListNode<Item>(item));
+                pqByPreference.Remove(new DLLNode(item));
 
                 return;
             }
 
             int preference = pqByPreference.Poll().Data.Preference;
 
-            DoublyLinkedList<Item> dList2 = preferrenceToList[preference];
+            DoublyLinkedList dList2 = preferrenceToList[preference];
 
-            ListNode<Item> leastRecentlyUsedWithLeastPreference = dList2.RemoveLast();
+            DLLNode leastRecentlyUsedWithLeastPreference = dList2.RemoveLast();
             keyToItemNode.Remove(leastRecentlyUsedWithLeastPreference.Data.Key);
             pqByExpiryTime.Remove(leastRecentlyUsedWithLeastPreference);
 
@@ -64,10 +64,10 @@
         {
             if (keyToItemNode.ContainsKey(key))
             {
-                ListNode<Item> node = keyToItemNode[key];
+                DLLNode node = keyToItemNode[key];
                 Item itemToReturn = node.Data;
 
-                DoublyLinkedList<Item> dList = preferrenceToList[itemToReturn.Preference];
+                var dList = preferrenceToList[itemToReturn.Preference];
 
                 dList.RemoveNode(node);
                 dList.AddFront(itemToReturn);
@@ -85,17 +85,17 @@
                 EvictItem(currentTime);
             }
 
-            DoublyLinkedList<Item> dlist;
+            DoublyLinkedList dlist;
             if (preferrenceToList.ContainsKey(item.Preference))
             {
                 dlist = preferrenceToList[item.Preference];
             }
             else
             {
-                dlist = new DoublyLinkedList<Item>();
+                dlist = new DoublyLinkedList();
                 preferrenceToList.Add(item.Preference, dlist);
             }
-            ListNode<Item> node = dlist.AddFront(item);
+            DLLNode node = dlist.AddFront(item);
             keyToItemNode[item.Key] = node;
             pqByExpiryTime.Add(node);
             pqByPreference.Add(node);

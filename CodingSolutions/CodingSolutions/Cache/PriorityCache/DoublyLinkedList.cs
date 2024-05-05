@@ -1,9 +1,9 @@
 ﻿namespace CodingSolutions.Cache.PriorityCache
 {
-    public class DoublyLinkedList<T>
+    public class DoublyLinkedList
     {
-        private ListNode<T> front;
-        private ListNode<T> end;
+        private DLLNode front;
+        private DLLNode end;
         private int size;
 
         public DoublyLinkedList()
@@ -11,18 +11,18 @@
             end = front = null;
         }
 
-        public ListNode<T> AddFront(T x)
+        public DLLNode AddFront(Item x)
         {
-            ListNode<T> retVal;
+            DLLNode retVal;
             if (size == 0)
             {
-                front = new ListNode<T>(x);
+                front = new DLLNode(x);
                 end = front;
                 retVal = front;
             }
             else
             {
-                ListNode<T> newNode = new ListNode<T>(null, x, null);
+                DLLNode newNode = new DLLNode(null, x, null);
                 newNode.Next = front;
                 front.Prev = newNode;
                 front = newNode;
@@ -32,15 +32,15 @@
             return retVal;
         }
 
-        public ListNode<T> RemoveLast()
+        public DLLNode RemoveLast()
         {
-            ListNode<T> item = end;
+            DLLNode item = end;
             end = end.Prev;
             size--;
             return item;
         }
 
-        public void RemoveNode(ListNode<T> node)
+        public void RemoveNode(DLLNode node)
         {
             if (size == 0)
             {
@@ -53,16 +53,14 @@
             }
             else
             {
-                ListNode<T> prev = node.Prev;
-                ListNode<T> next = node.Next;
+                DLLNode prev = node.Prev;
+                DLLNode next = node.Next;
 
                 if (prev != null)
                     prev.Next = next;
 
                 if (next != null)
                     next.Prev = prev;
-
-                node = null;
             }
 
             size--;
@@ -73,5 +71,4 @@
             return size;
         }
     }
-
 }
