@@ -1,4 +1,4 @@
-﻿using CodingSolutions.Cache.Educative;
+﻿using CodingSolutions.Cache.PriorityCache;
 using FluentAssertions;
 
 namespace CodingSolutionsTest.Cache

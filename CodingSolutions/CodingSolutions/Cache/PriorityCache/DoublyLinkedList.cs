@@ -1,4 +1,4 @@
-﻿namespace CodingSolutions.Cache.Educative
+﻿namespace CodingSolutions.Cache.PriorityCache
 {
     public class DoublyLinkedList<T>
     {
