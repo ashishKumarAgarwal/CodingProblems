@@ -9,8 +9,6 @@
         public ListNode(T data)
         {
             Data = data;
-            Next = null;
-            Prev = null;
         }
 
         public ListNode(ListNode<T> prev, T data, ListNode<T> next)

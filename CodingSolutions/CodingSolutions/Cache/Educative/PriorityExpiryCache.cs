@@ -2,18 +2,18 @@
 {
     public class PriorityExpiryCache
     {
-        private int maxSize;
-        private int currSize;
+        private int _maxSize;
+        private int _currSize;
 
-        private PriorityQueue<ListNode<Item>> pqByExpiryTime = new PriorityQueue<ListNode<Item>>((a, b) => a.Data.ExpireAfter - b.Data.ExpireAfter);
-        private PriorityQueue<ListNode<Item>> pqByPreference = new PriorityQueue<ListNode<Item>>((a, b) => a.Data.Preference - b.Data.Preference);
-        private Dictionary<int, DoublyLinkedList<Item>> preferrenceToList = new Dictionary<int, DoublyLinkedList<Item>>();
-        private Dictionary<string, ListNode<Item>> keyToItemNode = new Dictionary<string, ListNode<Item>>();
+        private PriorityQueue<ListNode<Item>> pqByExpiryTime = new((a, b) => a.Data.ExpireAfter - b.Data.ExpireAfter);
+        private PriorityQueue<ListNode<Item>> pqByPreference = new((a, b) => a.Data.Preference - b.Data.Preference);
+        private Dictionary<int, DoublyLinkedList<Item>> preferrenceToList = new();
+        private Dictionary<string, ListNode<Item>> keyToItemNode = new();
 
         public PriorityExpiryCache(int maxSize)
         {
-            this.maxSize = maxSize;
-            this.currSize = 0;
+            _maxSize = maxSize;
+            _currSize = 0;
         }
 
         public HashSet<string> GetKeys()
@@ -23,9 +23,9 @@
 
         public void EvictItem(int currentTime)
         {
-            if (currSize == 0) return;
+            if (_currSize == 0) return;
 
-            currSize--;
+            _currSize--;
 
             if (pqByExpiryTime.Peek().Data.ExpireAfter < currentTime)
             {
@@ -80,7 +80,7 @@
 
         public void SetItem(Item item, int currentTime)
         {
-            if (currSize == maxSize)
+            if (_currSize == _maxSize)
             {
                 EvictItem(currentTime);
             }
@@ -99,7 +99,7 @@
             keyToItemNode[item.Key] = node;
             pqByExpiryTime.Add(node);
             pqByPreference.Add(node);
-            currSize++;
+            _currSize++;
         }
     }
 
