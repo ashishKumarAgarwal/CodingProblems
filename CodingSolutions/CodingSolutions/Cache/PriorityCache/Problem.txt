@@ -1,0 +1,47 @@
+﻿Problem Statement: Design Priority Expiration LRU Cache.
+
+Description:
+Least Recently Used (LRU) Cache is a very common problem asked in interviews. Take a look here if you want to know more : https://leetcode.com/problems/lru-cache/
+
+As we know LRU Cache has these rules:
+
+It has a maximum capacity to hold items.
+Each cache key has a corresponding value.
+If there is a cache set/get, the item becomes most recently used.
+If the cache becomes full and a new item is pushed, there is an eviction policy to remove the least recently used item first and then push the current item.
+The key to solve the problem is to realize that a hash table and a doubly linked list can be used to do get/set operation efficiently in constant time.
+
+However PE LRU Cache has been asked in some recent interviews at Tesla[1], British Petroleum[2] etc.
+
+Lets see what is it?
+
+The Priority Expiration LRU Cache has additional constraints:
+
+When adding an item to the cache, each key is accompanied by its respective value, priority, and expiration time.
+Should the cache reach its capacity, the eviction policy comes into effect, leading to the removal of the entry with the earliest expiration time.
+In cases where multiple keys share the same expiration time, any of them could be chosen for eviction.
+If there are no items with the given expiration time, the eviction process targets the item with the lowest priority.
+When several items share the same minimal priority, the one that has been least recently used is selected for eviction. It's worth noting that the least recently used item might not necessarily possess the lowest priority.
+Lets take the example as posted in one of the interview questions posted above:
+
+GetExpiryThreshold() => returns a random value in range [0, 100000]
+cache = new Cache(5)
+cache.Set(key:"A", value:5, priority:1, expiry: 1000) // [A]
+cache.Set(key:"B", value:15, priority:5, expiry: 500) // [B, A]
+cache.Set(key:"C", value:0, priority:5, expiry: 2000) // [C, B, A]
+cache.Set(key:"D", value:1, priority:5, expiry: 2000) // [D, C, B, A]
+cache.Set(key:"E", value:10, priority:5, expiry: 3000) // [E, D, C, B, A]
+cache.Get("C") // returns 0 // [C, E, D, B, A]
+cache.Set(key:"F", value:15, priority:5, expiry: 1000) // since cache is full here expiry threshold applies, ex- if it returned 600, then B gets evicted and F gets inserted
+// [F, C, E, D, A]
+cache.Set(key:"G", value:0, priority:5, expiry: 2000) // again assume threshold returned 600 then none of the items expired, so the least priority item i.e. A gets evicted and G inserted
+// [G, F, C, E, D]
+cache.Set(key:"H", value:1, priority:1, expiry: 2000) // assuming threshold as 600, here none expired and all items have same priority, so least recently item D gets evicted
+// [H, G, F, C, E]
+cache.Get("D") // throw exception as D is not present in cache
+cache.Set(key:"I", value:10, priority:2, expiry: 2000) // assuming threshold is 2000, the oldest expired item is F:1000, it gets evicted and I inserted
+// [I, H, G, C, E]
+cache.Set(key:"E", value:10, priority:2, expiry: 2000) // since E is already there no eviction
+// [E, I, H, G, C]
+cache.Set(key:"M", value:10, priority:1, expiry: 3000) // asuming threshold as 2000, all the items have same expiry so least priority H will get evicted
+// [M, E, I, G, C]
